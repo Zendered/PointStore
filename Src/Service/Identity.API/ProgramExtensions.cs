@@ -1,7 +1,10 @@
 ﻿using Identity.API.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace Identity.API
 {
@@ -32,6 +35,32 @@ namespace Identity.API
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             builder.Services.AddEndpointsApiExplorer();
+        }
+
+        public static void AddCustomAuthentication(this WebApplicationBuilder builder)
+        {
+            var secretkey = builder.Configuration["AppSettings:Secret"];
+            var issuer = builder.Configuration["AppSettings:Issuer"];
+            var audience = builder.Configuration["AppSettings:ValidIn"];
+
+            builder.Services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(bearerOptions =>
+            {
+                bearerOptions.RequireHttpsMetadata = true;
+                bearerOptions.SaveToken = true;
+                bearerOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretkey)),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidIssuer = issuer,
+                };
+            });
         }
 
         public static void AddCustomSwaggerConfig(this WebApplicationBuilder builder)
