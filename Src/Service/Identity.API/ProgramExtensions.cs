@@ -1,6 +1,7 @@
 ﻿using Identity.API.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace Identity.API
 {
@@ -15,9 +16,9 @@ namespace Identity.API
 
         public static void AddCustomMvc(this WebApplicationBuilder builder)
         {
-            //builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews();
             builder.Services.AddControllers();
-            //builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages();
         }
 
         public static void AddCustomDatabase(this WebApplicationBuilder builder) =>
@@ -31,7 +32,18 @@ namespace Identity.API
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+        }
+
+        public static void AddCustomSwaggerConfig(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddSwaggerGen(opt =>
+            opt.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "PointStore Identity API",
+                Description = "Authentication/Authorization API",
+                Contact = new OpenApiContact() { Name = "Fake name", Email = "fake_email@mail.com" },
+                License = new OpenApiLicense() { Name = "MIT", Url = new Uri("https://opensource.org/license/mit/") }
+            }));
         }
 
         static IConfiguration GetConfiguration()
