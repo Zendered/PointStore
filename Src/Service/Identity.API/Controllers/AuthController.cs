@@ -10,7 +10,7 @@ namespace Identity.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : MainController
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
@@ -30,7 +30,7 @@ namespace Identity.API.Controllers
         public async Task<ActionResult> Register(RegisterViewModel userRegister)
         {
 
-            if (!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var user = new IdentityUser
             {
@@ -43,17 +43,21 @@ namespace Identity.API.Controllers
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return Ok(await GenareteJwt(userRegister.Email));
+                return CustomResponse(await GenareteJwt(userRegister.Email));
             }
 
-            return BadRequest();
+            foreach (var error in result.Errors)
+            {
+                AddProcessingError(error.Description);
+            }
+
+            return CustomResponse();
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginViewModel userLogin)
         {
-            if (!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var result = await _signInManager.PasswordSignInAsync(
                 userLogin.Email,
@@ -62,7 +66,19 @@ namespace Identity.API.Controllers
                 true
                 );
 
-            return result.Succeeded ? Ok(await GenareteJwt(userLogin.Email)) : BadRequest();
+            if (result.Succeeded)
+            {
+                return CustomResponse(await GenareteJwt(userLogin.Email));
+            }
+
+            if (result.IsLockedOut)
+            {
+                AddProcessingError("blocked for too many invalid tries. Try again latter");
+                return CustomResponse();
+            }
+
+            AddProcessingError("Username or Password incorrect");
+            return CustomResponse();
         }
 
         [HttpGet]
