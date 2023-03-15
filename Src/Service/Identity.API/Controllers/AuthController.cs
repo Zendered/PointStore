@@ -86,6 +86,17 @@ namespace Identity.API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
+
+            var identityClaims = await GetUsersClaims(claims, user);
+            var encodedToken = EncodeToken(identityClaims);
+
+            return GetTokenResponse(encodedToken, user, claims);
+
+        }
+
+        private async Task<ClaimsIdentity> GetUsersClaims(ICollection<Claim> claims, IdentityUser user)
+        {
+
             var userRoles = await _userManager.GetRolesAsync(user);
 
             claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
@@ -103,6 +114,11 @@ namespace Identity.API.Controllers
             var identityClaims = new ClaimsIdentity();
             identityClaims.AddClaims(claims);
 
+            return identityClaims;
+        }
+
+        private string EncodeToken(ClaimsIdentity identityClaims)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["AppSettings:Secret"]);
 
@@ -117,6 +133,11 @@ namespace Identity.API.Controllers
 
             var encodedToken = tokenHandler.WriteToken(token);
 
+            return encodedToken;
+        }
+
+        private UserLoginResponseViewModel GetTokenResponse(string encodedToken, IdentityUser user, IEnumerable<Claim> claims)
+        {
             var response = new UserLoginResponseViewModel
             {
                 AccessToken = encodedToken,
