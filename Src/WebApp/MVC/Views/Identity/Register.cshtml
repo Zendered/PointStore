@@ -1,4 +1,4 @@
-﻿@model DevStore.WebApp.MVC.Models.UserRegister
+﻿@model WebApp.MVC.Models.AccountViewModels.RegisterViewModel
 
 @{
     ViewData["Title"] = "Register new user";
@@ -15,7 +15,8 @@
 
             <form asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
 
-                <div class="form-group">
+
+                @*<div class="form-group">
                     <label asp-for="Name"></label>
                     <input asp-for="Name" class="form-control" />
                     <span asp-validation-for="Name" class="text-danger"></span>
@@ -25,7 +26,7 @@
                     <label asp-for="SocialNumber"></label>
                     <input asp-for="SocialNumber" class="form-control" />
                     <span asp-validation-for="SocialNumber" class="text-danger"></span>
-                </div>
+                </div>*@
 
                 <div class="form-group">
                     <label asp-for="Email"></label>

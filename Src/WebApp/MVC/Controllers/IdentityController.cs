@@ -16,7 +16,11 @@ namespace WebApp.MVC.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterViewModel userRegister)
         {
-            return View();
+            if (!ModelState.IsValid) return View();
+
+            if (false) return View(userRegister);
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -30,14 +34,18 @@ namespace WebApp.MVC.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login(LoginViewModel userLogin)
         {
-            return View();
+            if (!ModelState.IsValid) return View();
+
+            if (false) return View(userLogin);
+
+            return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost]
-        [Route("register")]
-        public IActionResult Register()
+        [HttpGet]
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
         {
-            return View();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
