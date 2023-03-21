@@ -1,4 +1,6 @@
-﻿namespace WebApp.MVC
+﻿using WebApp.MVC.Services;
+
+namespace WebApp.MVC
 {
     public static class ProgramExtensions
     {
@@ -16,6 +18,11 @@
         {
             app.UseAuthentication();
             app.UseAuthorization();
+        }
+
+        public static void AddCustomDependencyInjection(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
         }
     }
 }
