@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using WebApp.MVC.Models.AccountViewModels;
-using WebApp.MVC.Services;
+using IAuthenticationService = WebApp.MVC.Services.IAuthenticationService;
 
 namespace WebApp.MVC.Controllers
 {
@@ -28,7 +32,9 @@ namespace WebApp.MVC.Controllers
 
             var response = await _authenticationService.Register(userRegister);
 
-            if (false) return View(userRegister);
+            //if (false) return View(userRegister);
+
+            await DoLogin(response);
 
             return RedirectToAction("Index", "Home");
         }
@@ -48,7 +54,9 @@ namespace WebApp.MVC.Controllers
 
             var response = await _authenticationService.Login(userLogin);
 
-            if (false) return View(userLogin);
+            //if (false) return View(userLogin);
+
+            await DoLogin(response);
 
             return RedirectToAction("Index", "Home");
         }
@@ -58,6 +66,35 @@ namespace WebApp.MVC.Controllers
         public async Task<IActionResult> Logout()
         {
             return RedirectToAction("Index", "Home");
+        }
+
+        private async Task DoLogin(UserLoginResponse loginResponse)
+        {
+            var token = GetFormatedToken(loginResponse.AccessToken);
+
+            var claims = new List<Claim>();
+            claims.Add(new Claim("JWT", loginResponse.AccessToken));
+            claims.AddRange(token.Claims);
+
+            var claimsIdentity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
+                IsPersistent = true
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+        }
+
+        private static JwtSecurityToken GetFormatedToken(string jwtToken)
+        {
+            return new JwtSecurityTokenHandler().ReadToken(jwtToken) as JwtSecurityToken;
         }
     }
 }
