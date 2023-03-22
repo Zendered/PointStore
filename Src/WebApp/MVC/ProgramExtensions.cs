@@ -1,4 +1,5 @@
-﻿using WebApp.MVC.Services;
+﻿using WebApp.MVC.Extensions;
+using WebApp.MVC.Services;
 
 namespace WebApp.MVC
 {
@@ -23,6 +24,8 @@ namespace WebApp.MVC
         public static void AddCustomDependencyInjection(this WebApplicationBuilder builder)
         {
             builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddScoped<IUser, AspNetUser>();
         }
     }
 }
