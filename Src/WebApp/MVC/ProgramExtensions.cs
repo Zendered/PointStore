@@ -27,5 +27,29 @@ namespace WebApp.MVC
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddScoped<IUser, AspNetUser>();
         }
+
+        public static void AddCustomMVCConfig(this WebApplication app)
+        {
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/error/500");
+                app.UseStatusCodePagesWithRedirects("/error/{0}");
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.AddCustomAuthentication();
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+        }
     }
 }

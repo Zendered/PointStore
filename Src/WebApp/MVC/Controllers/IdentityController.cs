@@ -28,6 +28,7 @@ namespace WebApp.MVC.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterViewModel userRegister)
         {
+            return new StatusCodeResult(401);
             if (!ModelState.IsValid) return View(userRegister);
 
             var response = await _authenticationService.Register(userRegister);
