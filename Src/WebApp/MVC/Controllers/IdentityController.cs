@@ -8,7 +8,7 @@ using IAuthenticationService = WebApp.MVC.Services.IAuthenticationService;
 
 namespace WebApp.MVC.Controllers
 {
-    public class IdentityController : Controller
+    public class IdentityController : MainController
     {
         private readonly IAuthenticationService _authenticationService;
 
@@ -32,7 +32,7 @@ namespace WebApp.MVC.Controllers
 
             var response = await _authenticationService.Register(userRegister);
 
-            //if (false) return View(userRegister);
+            if (HasError(response.ResponseResult)) return View(userRegister);
 
             await DoLogin(response);
 
@@ -54,7 +54,7 @@ namespace WebApp.MVC.Controllers
 
             var response = await _authenticationService.Login(userLogin);
 
-            //if (false) return View(userLogin);
+            if (HasError(response.ResponseResult)) return View(userLogin);
 
             await DoLogin(response);
 

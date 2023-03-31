@@ -1,10 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
+using WebApp.MVC.Models;
 using WebApp.MVC.Models.AccountViewModels;
 
 namespace WebApp.MVC.Services
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService : Service, IAuthenticationService
     {
         private readonly HttpClient _httpClient;
 
@@ -24,7 +25,17 @@ namespace WebApp.MVC.Services
                 "https://localhost:44346/api/v1/Auth/login",
                 loginContent);
 
-            var test = await response.Content.ReadAsStringAsync();
+            if (!ErrosResponse(response))
+            {
+                return new UserLoginResponse
+                {
+                    ResponseResult =
+                    JsonSerializer.Deserialize<ResponseResult>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                };
+            };
+
             return JsonSerializer.Deserialize<UserLoginResponse>(
                 await response.Content.ReadAsStringAsync(),
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -40,6 +51,17 @@ namespace WebApp.MVC.Services
             var response = await _httpClient.PostAsync(
                 "https://localhost:44346/api/identity/register",
                 registerContent);
+
+            if (!ErrosResponse(response))
+            {
+                return new UserLoginResponse
+                {
+                    ResponseResult =
+                    JsonSerializer.Deserialize<ResponseResult>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                };
+            };
 
             return JsonSerializer.Deserialize<UserLoginResponse>(await response.Content.ReadAsStringAsync());
         }
