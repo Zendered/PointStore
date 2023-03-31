@@ -28,7 +28,7 @@ namespace WebApp.MVC.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterViewModel userRegister)
         {
-            return new StatusCodeResult(401);
+            return new StatusCodeResult(500);
             if (!ModelState.IsValid) return View(userRegister);
 
             var response = await _authenticationService.Register(userRegister);
@@ -42,15 +42,17 @@ namespace WebApp.MVC.Controllers
 
         [HttpGet]
         [Route("Login")]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login(LoginViewModel userLogin)
+        public async Task<IActionResult> Login(LoginViewModel userLogin, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid) return View(userLogin);
 
             var response = await _authenticationService.Login(userLogin);
@@ -59,7 +61,9 @@ namespace WebApp.MVC.Controllers
 
             await DoLogin(response);
 
-            return RedirectToAction("Index", "Home");
+            return string.IsNullOrEmpty(returnUrl)
+                ? RedirectToAction("Index", "Home")
+                : LocalRedirect(returnUrl);
         }
 
         [HttpGet]
