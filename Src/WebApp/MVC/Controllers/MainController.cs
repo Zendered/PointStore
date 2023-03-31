@@ -9,6 +9,11 @@ namespace WebApp.MVC.Controllers
         {
             if (response is not null && response.Errors.Messages.Any())
             {
+                foreach (var message in response.Errors.Messages)
+                {
+                    ModelState.AddModelError(string.Empty, message);
+                }
+
                 return true;
             }
             return false;
