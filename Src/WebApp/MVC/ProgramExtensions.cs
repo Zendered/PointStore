@@ -51,5 +51,21 @@ namespace WebApp.MVC
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         }
+
+        public static void AddCustomConfiguration(this WebApplicationBuilder builder)
+        {
+            builder.Configuration.AddConfiguration(GetConfiguration()).Build();
+
+        }
+
+        static IConfiguration GetConfiguration()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            return builder.Build();
+        }
     }
 }

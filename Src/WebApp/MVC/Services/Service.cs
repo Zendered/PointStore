@@ -1,9 +1,26 @@
-﻿using WebApp.MVC.Extensions;
+﻿using System.Text;
+using System.Text.Json;
+using WebApp.MVC.Extensions;
 
 namespace WebApp.MVC.Services
 {
     public abstract class Service
     {
+        protected StringContent ObtainContent(object data)
+        {
+            return new StringContent(
+                JsonSerializer.Serialize(data),
+                Encoding.UTF8,
+                "application/json"
+                );
+        }
+
+        protected async Task<T> DeserializeObjectResponse<T>(HttpResponseMessage responseMessage)
+        {
+            return JsonSerializer.Deserialize<T>(await responseMessage.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
         protected bool ErrosResponse(HttpResponseMessage response)
         {
             switch ((int)response.StatusCode)
